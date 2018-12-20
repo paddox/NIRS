@@ -7,9 +7,7 @@ from biosppy import storage
 from biosppy.signals import ecg
 import biosppy
 import plot
-# !!! Импортируем один из пакетов Matplotlib
 import pylab
-# !!! Импортируем пакет со вспомогательными функциями
 from matplotlib import mlab
 
 def indexOfMaxElement(array):
@@ -24,41 +22,50 @@ def indexOfMinElement(array):
     retvalue = sortarray[i][0]
     return retvalue
 
+#SAMPTO = секунды * частота дискретизации
 SAMPTO = 20 * 500
+
+
 # Demo 1 - Read a wfdb record using the 'rdrecord' function into a wfdb.Record object.
 # Plot the signals, and show the data.
-
-#record = wfdb.rdrecord('011a', pb_dir='staffiii/data/', sampto=SAMPTO, channels=[6])
+#Получение сигнала из Physionet с помощью библиотеки wfdb
 record = wfdb.rdrecord('rec_1', pb_dir='ecgiddb/Person_01/', channels=[0], sampto=SAMPTO)#, channels=[1])
 #wfdb.plot_wfdb(record=record, title='The ECG-ID Database')
 
 #display(record.__dict__)
-#sig = [record.p_signal[i][0] for i in range(len(record.p_signal))]
 
+#Получение сигнала из record для обработки
+sig = [record.p_signal[i][0] for i in range(len(record.p_signal))]
+
+#Чтение сигнала Wmodul
+'''
 sig = []
 with open("Wmodul.txt", "r") as f:
     for row in f:
         a = row.replace(",", ".")
         sig.append(float(a[:-2]))
 print(sig)
+'''
 
 # load raw ECG signal
 #signal, mdata = storage.load_txt('ecg.txt')
 #print(mdata)
-out = ecg.ecg(signal=sig, sampling_rate=1000., show=True)
+#Обработка сигнала с помощью библиотеки biosppy
+out = ecg.ecg(signal=sig, sampling_rate=500., show=True)
 print(out.keys())
 print(list(out[1]))
 
-dev = 0.6
+
+#Построение графиков исходного (sig) и отфильтрованного (out[1] или out['filtered']) сигнала
 plt.subplot(211)
-plt.plot([i / 1000 for i in range(int(SAMPTO * dev))],sig[:int(SAMPTO * dev)])
+plt.plot([i / 1000 for i in range(int(SAMPTO))],sig[:int(SAMPTO)])
 plt.title('Raw signal')
 plt.xlabel('time (s)') 
 plt.ylabel('Raw amplitude') 
 plt.grid(True)
 #subplot 2
 plt.subplot(212)
-plt.plot([i / 1000 for i in range(int(SAMPTO * dev))],out['filtered'][:int(SAMPTO * dev)])
+plt.plot([i / 1000 for i in range(int(SAMPTO))],out['filtered'][:int(SAMPTO)])
 plt.grid(True)
 plt.xlabel('time (s)') 
 plt.ylabel('Filtered amplitude') 
@@ -67,7 +74,7 @@ plt.show()
 
 
 
-
+#Далее идёт поиск зубцов PQRST
 filtered = list(out['filtered'])
 i = 0
 Q = []
@@ -93,7 +100,7 @@ del R[-1]
 print(R,Q,S)
 
 
-
+#Далее на графике ЭКГ покажем найденные точки PQRST 
 xlist1 = [i for i in range(SAMPTO)]
 # Вычислим значение функции в заданных точках
 ylist1 = out[1]
@@ -118,6 +125,8 @@ plt.grid(True)
 
 plt.show()
 
+
+#Далее покажем найденные точки PQRST относительно циклов серцебиения
 R_cent_y = ylistR
 N = len(R_cent_y)
 R_cent_x = [0 for i in range(N)]
@@ -132,12 +141,4 @@ plt.plot(R_cent_x, R_cent_y, 'ro')
 plt.plot(S_cent_x, ylistS, 'bo')
 plt.plot(T_cent_x, ylistT, 'mo')
 
-# !!! Покажем окно с нарисованным графиком
 plt.show()
-
-#plot.lineplot([i for i in range(len(out[1]))],out[1])
-
-'''
-wfdb.plot_wfdb(record=record, title='Record  a0007 from PhysioNet/CinC Challenge 2016: Training Sets') 
-display(record.__dict__)
-'''

@@ -9,6 +9,8 @@ from biosppy.signals import ecg
 
 SAMPTO = 10000
 
+#Здесь выделяются точки PQRST и записываются в файл
+
 class QRS:
     def __init__(self, px, py, qx, qy, rx, ry, sx, sy, tx, ty):
         self.px = px

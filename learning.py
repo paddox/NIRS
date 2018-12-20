@@ -8,6 +8,8 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import GridSearchCV
 from matplotlib.colors import Normalize
 
+#Здесь из файла, созданного в ecg.py, получаем данные точек PQRST и пробуем обучить систему различными методами машинного обучения
+
 class QRS:
     def __init__(self, px, py, qx, qy, rx, ry, sx, sy, tx, ty):
         self.px = px
